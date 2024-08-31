@@ -20,7 +20,7 @@ class SGD:
 
             if self.mu == 0:
 
-                self.l[i].W = None  # TODO
+                self.l[i].W = W - self.lr * self.layers[i].  # TODO
                 self.l[i].b = None  # TODO
 
             else:
