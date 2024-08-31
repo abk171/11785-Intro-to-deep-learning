@@ -140,7 +140,7 @@ class MLP4:
 
         for i in range(L):
 
-            A = self.layers[i].forward(self.A[i])  # TODO
+            A = self.layers[i].forward(A)  # TODO
 
             if self.debug:
 
@@ -160,8 +160,8 @@ class MLP4:
         L = len(self.layers)
 
         for i in reversed(range(L)):
-
-            dLdA = self.layers[i].backward(self.dLdA[L - i - 1])  # TODO
+            
+            dLdA = self.layers[i].backward(dLdA)  # TODO
 
             if self.debug:
 
