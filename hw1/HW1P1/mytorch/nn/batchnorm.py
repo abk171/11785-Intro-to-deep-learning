@@ -25,35 +25,41 @@ class BatchNorm1d:
         So see what values you need to recompute when eval is False.
         """
         self.Z = Z
-        self.N = None  # TODO
-        self.M = None  # TODO
-        self.V = None  # TODO
-
+        self.N = Z.shape[0]  # TODO
+        self.M = np.sum(Z, axis = 0) / self.N  # TODO
+        self.V = np.sum(np.square(self.Z - self.M), axis = 0) / self.N # TODO
+    
+        
         if eval == False:
             # training mode
-            self.NZ = None  # TODO
-            self.BZ = None  # TODO
+            self.NZ = (self.Z - self.M) / np.sqrt(self.V + self.eps)  # TODO
+            self.BZ = self.BW * self.NZ + self.Bb  # TODO
+            
 
-            self.running_M = None  # TODO
-            self.running_V = None  # TODO
+            self.running_M = self.alpha * self.running_M + (1 - self.alpha) * self.M  # TODO
+            self.running_V = self.alpha * self.running_V + (1 - self.alpha) * self.V  # TODO
             
             return self.BZ
         else:
             # inference mode
-            NZ = None  # TODO
-            BZ = None  # TODO
+            NZ = (self.Z - self.running_M) / np.sqrt(self.running_V + self.eps) # TODO
+            BZ = self.BW * NZ + self.Bb  # TODO
 
         return BZ
 
     def backward(self, dLdBZ):
-
-        self.dLdBW = None  # TODO
-        self.dLdBb = None  # TODO
-
-        dLdNZ = None  # TODO
-        dLdV = None  # TODO
-        dLdM = None  # TODO
-
-        dLdZ = None  # TODO
-
-        return NotImplemented
+        
+        self.dLdBb = np.sum(dLdBZ, axis = 0)  # TODO
+        self.dLdBW = np.sum(dLdBZ * self.NZ, axis = 0)  # TODO
+        # breakpoint()
+        dLdNZ = dLdBZ * self.BW  # TODO
+        # breakpoint()
+        dLdV = - 0.5 * np.sum(dLdNZ * (self.Z - self.M) * np.power(self.V + self.eps, -1.5), axis = 0)  # TODO
+        # breakpoint()
+        dNZdM =  - np.power(self.V + self.eps, -0.5) - 0.5 * (self.Z - self.M) * np.power(self.V + self.eps, -1.5) * ( -2 * np.sum(self.Z - self.M, axis = 0) / self.N ) # TODO
+        # breakpoint()
+        dLdM = np.sum(dLdNZ * dNZdM, axis = 0)
+        # breakpoint()
+        dLdZ = dLdNZ * np.power(self.V + self.eps, -0.5) + 2 * dLdV * (self.Z - self.M) / self.N + dLdM / self.N  # TODO
+        
+        return dLdZ
