@@ -28,9 +28,9 @@ DEBUG_AND_GRADE_CROSSENTROPYLOSS_flag = False
 
 # flags for optim.py
 
-DEBUG_AND_GRADE_SGD_flag = True
+DEBUG_AND_GRADE_SGD_flag = False
 DEBUG_AND_GRADE_SGD_momentum_flag = False
 
 # flags for batchnorm.py
 
-DEBUG_AND_GRADE_BATCHNORM_flag = False
+DEBUG_AND_GRADE_BATCHNORM_flag = True
