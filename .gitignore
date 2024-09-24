@@ -1,0 +1,7 @@
+*.tar
+*.zip
+*.ipynb_checkpoints
+hw1/HW1P2/.kaggle/
+hw1/HW1P2/dev-clean/
+hw1/HW1P2/test-clean/
+hw1/HW1P2/train-clean-100/
