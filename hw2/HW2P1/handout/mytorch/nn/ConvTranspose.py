@@ -12,8 +12,12 @@ class ConvTranspose1d():
 
         # Initialize Conv1d stride 1 and upsample1d isntance
         # TODO
-        self.upsample1d = None  # TODO
-        self.conv1d_stride1 = None  # TODO
+        self.upsample1d = Upsample1d(self.upsampling_factor)  # TODO
+        self.conv1d_stride1 = Conv1d_stride1(in_channels,
+                                             out_channels,
+                                             kernel_size,
+                                             weight_init_fn,
+                                             bias_init_fn)  # TODO
 
     def forward(self, A):
         """
@@ -24,12 +28,13 @@ class ConvTranspose1d():
         """
         # TODO
         # upsample
-        A_upsampled = None  # TODO
+        A_upsampled = self.upsample1d.forward(A)  # TODO
 
         # Call Conv1d_stride1()
-        Z = None  # TODO
+        
+        Z = self.conv1d_stride1.forward(A_upsampled)  # TODO
 
-        return NotImplemented
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -41,11 +46,12 @@ class ConvTranspose1d():
         # TODO
 
         # Call backward in the correct order
-        delta_out = None  # TODO
+        
+        delta_out = self.conv1d_stride1.backward(dLdZ)  # TODO
 
-        dLdA = None  # TODO
+        dLdA = self.upsample1d.backward(delta_out)  # TODO
 
-        return NotImplemented
+        return dLdA
 
 
 class ConvTranspose2d():
