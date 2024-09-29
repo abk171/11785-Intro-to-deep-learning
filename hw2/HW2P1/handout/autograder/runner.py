@@ -1740,18 +1740,18 @@ tests = [
     #     'handler': test_conv2d_stride1,
     #     'value': 10,
     # },
-    {
-        'name': '5.2.2 - Conv2d | 5 points',
-        'autolab': 'Conv2d',
-        'handler': test_conv2d,
-        'value': 5,
-    },
     # {
-    #     'name': '5.3.1 ConvTranspose1d | 5 points',
-    #     'autolab': 'convTranspose1d',
-    #     'handler': test_convTranspose_1d_correctness,
+    #     'name': '5.2.2 - Conv2d | 5 points',
+    #     'autolab': 'Conv2d',
+    #     'handler': test_conv2d,
     #     'value': 5,
     # },
+    {
+        'name': '5.3.1 ConvTranspose1d | 5 points',
+        'autolab': 'convTranspose1d',
+        'handler': test_convTranspose_1d_correctness,
+        'value': 5,
+    },
     # {
     #     'name': '5.3.2 ConvTranspose2d | 5 points',
     #     'autolab': 'convTranspose2d',
