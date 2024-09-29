@@ -1,4 +1,5 @@
 import numpy as np
+import pdb
 
 
 class Upsample1d():
@@ -14,9 +15,9 @@ class Upsample1d():
             Z (np.array): (batch_size, in_channels, output_width)
         """
 
-        Z = None  # TODO
-
-        return NotImplemented
+        Z = np.kron(A, [1] + [0] * (self.upsampling_factor - 1))[ : , : , : 1 - self.upsampling_factor]  # TODO
+        
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -26,9 +27,9 @@ class Upsample1d():
             dLdA (np.array): (batch_size, in_channels, input_width)
         """
 
-        dLdA = None  # TODO
-
-        return NotImplemented
+        dLdA = dLdZ[ : , : , ::self.upsampling_factor]  # TODO
+        pdb.set_trace()
+        return dLdA
 
 
 class Downsample1d():
@@ -43,10 +44,10 @@ class Downsample1d():
         Return:
             Z (np.array): (batch_size, in_channels, output_width)
         """
-
-        Z = None  # TODO
-
-        return NotImplemented
+        self.w_in = A.shape[-1]
+        Z = A[ : , : , ::self.downsampling_factor]  # TODO
+        
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -56,9 +57,11 @@ class Downsample1d():
             dLdA (np.array): (batch_size, in_channels, input_width)
         """
 
-        dLdA = None  # TODO
-
-        return NotImplemented
+        dLdA = np.kron(dLdZ, [1] + [0] * (self.downsampling_factor - 1))  # TODO
+        dLdA = dLdA[ : , : , : self.w_in]
+        
+        
+        return dLdA
 
 
 class Upsample2d():
@@ -73,10 +76,12 @@ class Upsample2d():
         Return:
             Z (np.array): (batch_size, in_channels, output_height, output_width)
         """
-
-        Z = None  # TODO
-
-        return NotImplemented
+        b = [1] + [0] * (self.upsampling_factor - 1)
+        c = np.array(b)[:, None] # make it a column vector
+        x_scaled = np.kron(A, b)[ : , : , : , :(1 - self.upsampling_factor)]
+        Z = np.kron(x_scaled, c)[ : , : , :(1 - self.upsampling_factor), : ]        # TODO
+        # pdb.set_trace()
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -85,10 +90,10 @@ class Upsample2d():
         Return:
             dLdA (np.array): (batch_size, in_channels, input_height, input_width)
         """
-
-        dLdA = None  # TODO
-
-        return NotImplemented
+        
+        dLdA = dLdZ[ : , : , ::self.upsampling_factor, ::self.upsampling_factor]  # TODO
+        # pdb.set_trace()
+        return dLdA
 
 
 class Downsample2d():
@@ -103,10 +108,11 @@ class Downsample2d():
         Return:
             Z (np.array): (batch_size, in_channels, output_height, output_width)
         """
+        self.h_in = A.shape[-2]
+        self.w_in = A.shape[-1]
+        Z = A[ : , : , ::self.downsampling_factor, ::self.downsampling_factor]  # TODO
 
-        Z = None  # TODO
-
-        return NotImplemented
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -115,7 +121,9 @@ class Downsample2d():
         Return:
             dLdA (np.array): (batch_size, in_channels, input_height, input_width)
         """
+        b = [1] + [0] * (self.downsampling_factor - 1)
+        c = np.array(b)[ : , None]
+        x_scaled = np.kron(dLdZ, b)[ : , : , : , :self.h_in]
+        dLdA = np.kron(x_scaled, c)[ : , : , :self.w_in, : ]  # TODO
 
-        dLdA = None  # TODO
-
-        return NotImplemented
+        return dLdA
