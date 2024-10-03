@@ -14,7 +14,29 @@ class MaxPool2d_stride1():
         Return:
             Z (np.array): (batch_size, out_channels, output_width, output_height)
         """
-        raise NotImplementedError
+        batch_size, in_channels, input_width, input_height = A.shape
+        
+        output_height = input_height - self.kernel + 1
+        output_width = input_width - self.kernel + 1
+
+        
+        Z = np.zeros((batch_size, in_channels, output_height, output_width))
+        self.maxIndex = np.empty(Z.shape, dtype=object)
+
+        for batch in range(batch_size):
+            for channel in range(in_channels):
+                for i in range(output_height):
+                    for j in range(output_width):
+                        mat = A[batch, channel, i : i + self.kernel, j : j + self.kernel]
+                        # pdb.set_trace()
+                        x, y = np.unravel_index(
+                            np.argmax(mat),
+                            mat.shape
+                        )
+                        self.maxIndex[batch, channel, i, j] = (i + x, j + y)
+                        Z[batch, channel, i, j] = A[batch, channel, i + x, j + y]
+        
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -23,8 +45,22 @@ class MaxPool2d_stride1():
         Return:
             dLdA (np.array): (batch_size, in_channels, input_width, input_height)
         """
-        raise NotImplementedError
+        batch_size, out_channels, output_width, output_height = dLdZ.shape
 
+        input_width = output_width + self.kernel - 1
+        input_height = output_height + self.kernel - 1
+
+        dLdA = np.zeros((batch_size, out_channels, input_height, input_width))
+
+        for batch in range(batch_size):
+            for channel in range(out_channels):
+                for i in range(output_height):
+                    for j in range(output_width):
+                        x, y = self.maxIndex[batch, channel, i, j]
+                        # pdb.set_trace()
+                        dLdA[batch, channel, x, y] += dLdZ[batch, channel, i, j]
+
+        return dLdA
 
 class MeanPool2d_stride1():
 
