@@ -94,8 +94,8 @@ class MaxPool2d():
         self.stride = stride
 
         # Create an instance of MaxPool2d_stride1
-        self.maxpool2d_stride1 = None  # TODO
-        self.downsample2d = None  # TODO
+        self.maxpool2d_stride1 = MaxPool2d_stride1(self.kernel)  # TODO
+        self.downsample2d = Downsample2d(self.stride)  # TODO
 
     def forward(self, A):
         """
@@ -104,8 +104,10 @@ class MaxPool2d():
         Return:
             Z (np.array): (batch_size, out_channels, output_width, output_height)
         """
+        A_maxpool = self.maxpool2d_stride1.forward(A)
+        Z = self.downsample2d.forward(A_maxpool)
 
-        raise NotImplementedError
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -114,7 +116,10 @@ class MaxPool2d():
         Return:
             dLdA (np.array): (batch_size, in_channels, input_width, input_height)
         """
-        raise NotImplementedError
+        dLdZ_upsampled = self.downsample2d.backward(dLdZ)
+        dLdA = self.maxpool2d_stride1.backward(dLdZ_upsampled)
+        
+        return dLdA
 
 
 class MeanPool2d():

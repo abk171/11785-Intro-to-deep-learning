@@ -1758,18 +1758,18 @@ tests = [
     #     'handler': test_convTranspose_2d_correctness,
     #     'value': 5,
     # },
-    {
-        'name': '5.5.1 - MaxPool2d_stride1 | 10 points',
-        'autolab': 'MaxPool2d_stride1',
-        'handler': test_MaxPool2d_stride1_correctness,
-        'value': 10,
-    },
     # {
-    #     'name': '5.5.2 - MaxPool2d | 5 points',
-    #     'autolab': 'MaxPool2d',
-    #     'handler': test_MaxPool2d_correctness,
-    #     'value': 5,
+    #     'name': '5.5.1 - MaxPool2d_stride1 | 10 points',
+    #     'autolab': 'MaxPool2d_stride1',
+    #     'handler': test_MaxPool2d_stride1_correctness,
+    #     'value': 10,
     # },
+    {
+        'name': '5.5.2 - MaxPool2d | 5 points',
+        'autolab': 'MaxPool2d',
+        'handler': test_MaxPool2d_correctness,
+        'value': 5,
+    },
     # {
     #     'name': '5.5.3 - MeanPool2d_stride1 | 10 points',
     #     'autolab': 'MeanPool2d_stride1',
