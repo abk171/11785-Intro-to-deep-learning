@@ -89,9 +89,10 @@ class Conv2d_stride1():
 
 
 class Conv2d():
-    def __init__(self, in_channels, out_channels, kernel_size, stride,
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding= 0,
                  weight_init_fn=None, bias_init_fn=None):
         # Do not modify the variable names
+        self.pad = padding
         self.stride = stride
 
         # Initialize Conv2d() and Downsample2d() isntance
@@ -109,6 +110,9 @@ class Conv2d():
         Return:
             Z (np.array): (batch_size, out_channels, output_height, output_width)
         """
+        # Padding A
+        A = np.pad(A, pad_width = ((0,0), (0,0), (self.pad, self.pad), (self.pad, self.pad)))
+
         # Call Conv2d_stride1
         # TODO
         A = self.conv2d_stride1.forward(A)
@@ -132,4 +136,7 @@ class Conv2d():
         # Call Conv1d_stride1 backward
         dLdA = self.conv2d_stride1.backward(dLdZ)  # TODO
 
-        return dLdA
+        if self.pad == 0:
+            return dLdA
+        else:
+            return dLdA[:, :, self.pad : -self.pad, self.pad : -self.pad]

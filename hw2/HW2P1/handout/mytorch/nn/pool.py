@@ -74,7 +74,21 @@ class MeanPool2d_stride1():
         Return:
             Z (np.array): (batch_size, out_channels, output_width, output_height)
         """
-        raise NotImplementedError
+        batch_size, in_channels, input_width, input_height = A.shape
+
+        output_width = input_width - self.kernel + 1
+        output_height = input_height - self.kernel + 1
+
+        Z = np.zeros((batch_size, in_channels, output_width, output_height))
+
+        for batch in range(batch_size):
+            for channel in range(in_channels):
+                for i in range(output_width):
+                    for j in range(output_height):
+                        mat = A[batch, channel, i : i + self.kernel, j : j + self.kernel]
+                        Z[batch, channel, i, j] = np.mean(mat)
+
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -84,7 +98,22 @@ class MeanPool2d_stride1():
             dLdA (np.array): (batch_size, in_channels, input_width, input_height)
         """
 
-        raise NotImplementedError
+        batch_size, out_channels, output_width, output_height = dLdZ.shape
+
+        input_width = output_width + self.kernel - 1
+        input_height = output_height + self.kernel - 1
+
+        dLdA = np.zeros((batch_size, out_channels, input_width, input_height))
+
+        dLdZ /= (self.kernel ** 2) 
+        
+        for batch in range(batch_size):
+            for channel in range(out_channels):
+                for i in range(self.kernel):
+                    for j in range(self.kernel):
+                        dLdA[batch, channel, i : i + output_width, j : j + output_height] += dLdZ[batch, channel, :, :]
+        
+        return dLdA
 
 
 class MaxPool2d():
@@ -129,8 +158,8 @@ class MeanPool2d():
         self.stride = stride
 
         # Create an instance of MaxPool2d_stride1
-        self.meanpool2d_stride1 = None  # TODO
-        self.downsample2d = None  # TODO
+        self.meanpool2d_stride1 = MeanPool2d_stride1(self.kernel)  # TODO
+        self.downsample2d = Downsample2d(self.stride)  # TODO
 
     def forward(self, A):
         """
@@ -139,7 +168,10 @@ class MeanPool2d():
         Return:
             Z (np.array): (batch_size, out_channels, output_width, output_height)
         """
-        raise NotImplementedError
+        A_mean = self.meanpool2d_stride1.forward(A)
+        Z = self.downsample2d.forward(A_mean)
+        
+        return Z
 
     def backward(self, dLdZ):
         """
@@ -148,4 +180,7 @@ class MeanPool2d():
         Return:
             dLdA (np.array): (batch_size, in_channels, input_width, input_height)
         """
-        raise NotImplementedError
+        dLdZ_upsampled = self.downsample2d.backward(dLdZ)
+        dLdA = self.meanpool2d_stride1.backward(dLdZ_upsampled)
+        
+        return dLdA

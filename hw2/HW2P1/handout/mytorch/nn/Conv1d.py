@@ -79,12 +79,12 @@ class Conv1d_stride1():
 
 
 class Conv1d():
-    def __init__(self, in_channels, out_channels, kernel_size, stride, #padding= 0,
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding= 0,
                  weight_init_fn=None, bias_init_fn=None):
         # Do not modify the variable names
 
         self.stride = stride
-        # self.padding = padding
+        self.pad = padding
 
         # Initialize Conv1d() and Downsample1d() isntance
         self.conv1d_stride1 = Conv1d_stride1(in_channels= in_channels, 
@@ -101,6 +101,8 @@ class Conv1d():
         Return:
             Z (np.array): (batch_size, out_channels, output_size)
         """
+        # Pad the input appropriately using np.pad() function
+        A = np.pad(A, ((0,0), (0,0), (self.pad,self.pad)))
 
         # Call Conv1d_stride1
         A = self.conv1d_stride1.forward(A)# TODO
@@ -124,4 +126,7 @@ class Conv1d():
         # Call Conv1d_stride1 backward
         dLdA = self.conv1d_stride1.backward(dLdZ)  # TODO
 
-        return dLdA
+        if self.pad == 0:
+            return dLdA
+        else:
+            return dLdA[:, :, self.pad : -self.pad]
