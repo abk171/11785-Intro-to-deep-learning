@@ -1,3 +1,4 @@
+.DS_Store
 *.tar
 *.zip
 *.ipynb_checkpoints
