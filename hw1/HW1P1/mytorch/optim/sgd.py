@@ -5,7 +5,7 @@ class SGD:
 
     def __init__(self, model, lr=0.1, momentum=0):
 
-        self.l = model.layers
+        self.l = model.layers[::2]
         self.L = len(model.layers)
         self.lr = lr
         self.mu = momentum
