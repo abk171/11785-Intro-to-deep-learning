@@ -13,7 +13,6 @@ sys.path.append('mytorch')
 from flatten import *
 
 sys.path.append('mytorch/nn')
-
 from pool import *
 from resampling import *
 from ConvTranspose import *
@@ -70,6 +69,9 @@ def test_upsampling_1d_correctness():
     expected_res = np.load(
         'autograder/ref_result/upsample_1d_res.npz',
         allow_pickle=True)
+    
+    print("Expected Res:", expected_res['forward_res_list'][0].shape)
+    print("Forward Res:", ep_fres_arr[0].shape)
 
     try:
         for i in range(3):
@@ -196,6 +198,7 @@ def test_upsampling_2d_correctness():
 
     try:
         for i in range(3):
+            #print("i",i)
             assert(expected_res['forward_res_list']
                    [i].shape == ep_fres_arr[i].shape)
             assert(expected_res['backward_res_list']
@@ -449,6 +452,7 @@ def test_cnn_correctness_conv1d_once(idx):
     norm = np.linalg.norm
     in_c, out_c = rint(5, 15), rint(5, 15)
     kernel, stride = rint(1, 10), rint(1, 10)
+    padding = rint(1, 10)
     batch, width = rint(1, 4), rint(20, 300)
 
     def info():
@@ -473,14 +477,16 @@ def test_cnn_correctness_conv1d_once(idx):
             out_c,
             kernel,
             stride,
-            random_normal_weight_init_fn,
-            np.ones)
+            padding = padding,
+            weight_init_fn = random_normal_weight_init_fn,
+            bias_init_fn = np.ones
+            )
     except BaseException:
         info()
         print('Failed to pass parameters to your Conv1d function!')
         return scores_dict
 
-    model = nn.Conv1d(in_c, out_c, kernel, stride)
+    model = nn.Conv1d(in_c, out_c, kernel, stride, padding=padding)
     model.weight = nn.Parameter(torch.tensor(net.conv1d_stride1.W))
     model.bias = nn.Parameter(torch.tensor(net.conv1d_stride1.b))
 
@@ -745,6 +751,7 @@ def conv2d_correctness():
     out_c = np.random.randint(5, 15)
     kernel = np.random.randint(3, 7)
     stride = np.random.randint(3, 5)
+    padding = np.random.randint(3, 5)
     width = np.random.randint(60, 80)
     batch = np.random.randint(1, 4)
     # upsampling_factor = 1
@@ -764,10 +771,11 @@ def conv2d_correctness():
         out_c,
         kernel,
         stride,
-        random_normal_weight_init_fn,
-        np.zeros)
+        padding = padding,
+        weight_init_fn = random_normal_weight_init_fn,
+        bias_init_fn = np.zeros)
 
-    torch_model = nn.Conv2d(in_c, out_c, kernel, stride=stride)
+    torch_model = nn.Conv2d(in_c, out_c, kernel, stride=stride, padding = padding)
     torch_model.weight = nn.Parameter(
         torch.tensor(test_model.conv2d_stride1.W))
     torch_model.bias = nn.Parameter(torch.tensor(test_model.conv2d_stride1.b))
@@ -1393,7 +1401,7 @@ def test_simple_scanning_mlp():
             'ref_result',
             'res_b.npy'),
         allow_pickle=True)
-    result = cnn.forward(data)
+    result = cnn.forward(data) # here
 
     try:
         assert(isinstance(result, type(expected_result)))
@@ -1592,6 +1600,11 @@ def cnn_model_correctness(idx):
 
     forward_res = y2 - y1.detach().numpy()
     forward_res_norm = abs(forward_res).max()
+    
+    # print("y1",y1)
+    # print("y2",y2)
+    
+    print("frn",forward_res_norm)
 
     if forward_res_norm < TOLERANCE:
         scores_dict[0] = 1
@@ -1668,142 +1681,111 @@ def test_conv1d_model():
 # 'autolab' is the name on autolab I think, but you probably won't need to worry about it.
 # The test functions should return True or False.
 tests = [
-    # {
-    #     'name': '3.1 - MCQ 1 | 1 point',
-    #     'autolab': 'MCQ 1',
-    #     'handler': test_mcq_1,
-    #     'value': 1,
-    # },
-    # {
-    #     'name': '3.2 - MCQ 2 | 1 point',
-    #     'autolab': 'MCQ 2',
-    #     'handler': test_mcq_2,
-    #     'value': 1,
-    # },
-    # {
-    #     'name': '3.3 - MCQ 3 | 1 point',
-    #     'autolab': 'MCQ 3',
-    #     'handler': test_mcq_3,
-    #     'value': 1,
-    # },
-    # {
-    #     'name': '3.4 - MCQ 4 | 1 point',
-    #     'autolab': 'MCQ 4',
-    #     'handler': test_mcq_4,
-    #     'value': 1,
-    # },
-    # {
-    #     'name': '3.5 - MCQ 5 | 1 point',
-    #     'autolab': 'MCQ 5',
-    #     'handler': test_mcq_5,
-    #     'value': 1,
-    # },
-    # {
-    #     'name': '4.1.a - Downsampling1d | 2.5 points',
-    #     'autolab': 'Downsampling1d',
-    #     'handler': test_downsampling_1d_correctness,
-    #     'value': 2.5,
-    # },
-    # {
-    #     'name': '4.1.b - Upsampling1d | 2.5 points',
-    #     'autolab': 'Upsampling1d',
-    #     'handler': test_upsampling_1d_correctness,
-    #     'value': 2.5,
-    # },
-    # {
-    #     'name': '4.2.a - Downsampling2d | 2.5 points',
-    #     'autolab': 'Downsampling2d',
-    #     'handler': test_downsampling_2d_correctness,
-    #     'value': 2.5,
-    # },
-    # {
-    #     'name': '4.2.b - Upsampling2d | 2.5 points',
-    #     'autolab': 'Upsampling2d',
-    #     'handler': test_upsampling_2d_correctness,
-    #     'value': 2.5,
-    # },
-    # {
-    #     'name': '5.1.1 - Conv1d_stride1 | 10 points',
-    #     'autolab': 'Conv1d_stride1',
-    #     'handler': test_cnn_correctness_conv1d_stride1,
-    #     'value': 10,
-    # },
-    # {
-    #     'name': '5.1.2 - Conv1d | 5 points',
-    #     'autolab': 'Conv1d',
-    #     'handler': test_cnn_correctness_conv1d,
-    #     'value': 5,
-    # },
-    # {
-    #     'name': '5.2.1 - Conv2d_stride1 | 10 points',
-    #     'autolab': 'Conv2d-stride1',
-    #     'handler': test_conv2d_stride1,
-    #     'value': 10,
-    # },
-    # {
-    #     'name': '5.2.2 - Conv2d | 5 points',
-    #     'autolab': 'Conv2d',
-    #     'handler': test_conv2d,
-    #     'value': 5,
-    # },
+    {
+        'name': '4.1.a - Downsampling1d | 2.5 points',
+        'autolab': 'Downsampling1d',
+        'handler': test_downsampling_1d_correctness,
+        'value': 2.5,
+    },
+    {
+        'name': '4.1.b - Upsampling1d | 2.5 points',
+        'autolab': 'Upsampling1d',
+        'handler': test_upsampling_1d_correctness,
+        'value': 2.5,
+    },
+    {
+        'name': '4.2.a - Downsampling2d | 2.5 points',
+        'autolab': 'Downsampling2d',
+        'handler': test_downsampling_2d_correctness,
+        'value': 2.5,
+    },
+    {
+        'name': '4.2.b - Upsampling2d | 2.5 points',
+        'autolab': 'Upsampling2d',
+        'handler': test_upsampling_2d_correctness,
+        'value': 2.5,
+    },
+    {
+        'name': '5.1.1 - Conv1d_stride1 | 10 points',
+        'autolab': 'Conv1d_stride1',
+        'handler': test_cnn_correctness_conv1d_stride1,
+        'value': 10,
+    },
+    {
+        'name': '5.1.2 - Conv1d | 5 points',
+        'autolab': 'Conv1d',
+        'handler': test_cnn_correctness_conv1d,
+        'value': 5,
+    },
+    {
+        'name': '5.2.1 - Conv2d_stride1 | 10 points',
+        'autolab': 'Conv2d_stride1',
+        'handler': test_conv2d_stride1,
+        'value': 10,
+    },
+    {
+        'name': '5.2.2 - Conv2d | 5 points',
+        'autolab': 'Conv2d',
+        'handler': test_conv2d,
+        'value': 5,
+    },
     {
         'name': '5.3.1 ConvTranspose1d | 5 points',
         'autolab': 'convTranspose1d',
         'handler': test_convTranspose_1d_correctness,
         'value': 5,
     },
-    # {
-    #     'name': '5.3.2 ConvTranspose2d | 5 points',
-    #     'autolab': 'convTranspose2d',
-    #     'handler': test_convTranspose_2d_correctness,
-    #     'value': 5,
-    # },
-    # {
-    #     'name': '5.5.1 - MaxPool2d_stride1 | 10 points',
-    #     'autolab': 'MaxPool2d_stride1',
-    #     'handler': test_MaxPool2d_stride1_correctness,
-    #     'value': 10,
-    # },
-    # {
-    #     'name': '5.5.2 - MaxPool2d | 5 points',
-    #     'autolab': 'MaxPool2d',
-    #     'handler': test_MaxPool2d_correctness,
-    #     'value': 5,
-    # },
-    # {
-    #     'name': '5.5.3 - MeanPool2d_stride1 | 10 points',
-    #     'autolab': 'MeanPool2d_stride1',
-    #     'handler': test_mean_pool_stride1,
-    #     'value': 10,
-    # },
+    {
+        'name': '5.3.2 ConvTranspose2d | 5 points',
+        'autolab': 'convTranspose2d',
+        'handler': test_convTranspose_2d_correctness,
+        'value': 5,
+    },
+    {
+        'name': '5.5.1 - MaxPool2d_stride1 | 10 points',
+        'autolab': 'MaxPool2d_stride1',
+        'handler': test_MaxPool2d_stride1_correctness,
+        'value': 10,
+    },
+    {
+        'name': '5.5.2 - MaxPool2d | 5 points',
+        'autolab': 'MaxPool2d',
+        'handler': test_MaxPool2d_correctness,
+        'value': 5,
+    },
+    {
+        'name': '5.5.3 - MeanPool2d_stride1 | 10 points',
+        'autolab': 'MeanPool2d_stride1',
+        'handler': test_mean_pool_stride1,
+        'value': 10,
+    },
 
-    # {
-    #     'name': '5.5.4 - MeanPool2d | 5 ponts',
-    #     'autolab': 'MeanPool2d',
-    #     'handler': test_mean_pool,
-    #     'value': 5,
-    # },
-    # {
-    #     'name': '6.1 - CNN as Simple Scanning MLP | 5 points',
-    #     'autolab': 'CNN as Simple Scanning MLP',
-    #     'handler': test_simple_scanning_mlp,
-    #     'value': 5,
-    # },
-    # {
-    #     'name': '6.2 - CNN as Distributed Scanning MLP | 5 points',
-    #     'autolab': 'CNN as Distributed Scanning MLP',
-    #     'handler': test_distributed_scanning_mlp,
-    #     'value': 10,
-    # },
-    # {
-    #     'name': '7 - Build a CNN Model | 5 points',
-    #     'autolab': 'Build a CNN Model',
-    #     'handler': test_conv1d_model,
-    #     'value': 5,
-    # }
+    {
+        'name': '5.5.4 - MeanPool2d | 5 ponts',
+        'autolab': 'MeanPool2d',
+        'handler': test_mean_pool,
+        'value': 5,
+    },
+    {
+        'name': '6.1 - CNN as Simple Scanning MLP | 5 points',
+        'autolab': 'CNN as Simple Scanning MLP',
+        'handler': test_simple_scanning_mlp,
+        'value': 5,
+    },
+    {
+        'name': '6.2 - CNN as Distributed Scanning MLP | 5 points',
+        'autolab': 'CNN as Distributed Scanning MLP',
+        'handler': test_distributed_scanning_mlp,
+        'value': 10,
+    },
+    {
+        'name': '7 - Build a CNN Model | 5 points',
+        'autolab': 'Build a CNN Model',
+        'handler': test_conv1d_model,
+        'value': 5,
+    }
 ]
 
 
 if __name__ == '__main__':
-    # np.random.seed(2021)
     run_tests(tests)
